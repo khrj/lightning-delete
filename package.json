@@ -1,0 +1,14 @@
+{
+    "devDependencies": {
+        "@prisma/cli": "2.14.0"
+    },
+    "dependencies": {
+        "@prisma/client": "2.14.0",
+        "@slack/rtm-api": "^5.0.5",
+        "@slack/web-api": "^5.15.0",
+        "express": "^4.17.1"
+    },
+    "scripts": {
+        "start": "node index.js"
+    }
+}
