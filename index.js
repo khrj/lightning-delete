@@ -16,48 +16,75 @@ async function main() {
                 const matched = event.text.match(/^d*$/)
 
                 if (matched) {
-                    web.conversations.history({
-                        channel: event.channel
-                    }).then(async history => {
-                        let deleted = 0
-                        for (const message of history.messages) {
-                            if (message.user === id) {
-                                if (message.text && message.text.match(/^d*$/)) {
-                                    web.chat.delete({
-                                        channel: event.channel,
-                                        ts: message.ts,
-                                        as_user: true
-                                    })
-                                } else {
-                                    try {
-                                        await web.chat.delete({
-                                            channel: event.channel,
-                                            ts: message.ts,
-                                            as_user: true
-                                        })
-                                        deleted++
-                                        if (deleted >= event.text.length) {
-                                            break
-                                        }
-                                    } catch {
-                                        // Race condition, fail safely 
-                                        // since it will not make a difference
-                                        // (deleted is not incremented)
-                                    }
-                                }
-                            }
-                        }
-                    })
+                    if (!event.thread_ts) {
+                        web.conversations.history({
+                            channel: event.channel
+                        }).then(async history => {
+                            deleteMultiple(event.text.length, event.channel, history.messages)
+                        })
+                    } else {
+                        collectReplies(event.channel, event.thread_ts).then(async messages => {
+                            deleteMultiple(event.text.length, event.channel, messages.reverse())
+                        })
+                    }
                 }
             }
         })
+
+        async function deleteMultiple(count, channel, messages) {
+            let deleted = 0
+            for (const message of messages) {
+                if (message.user === id) {
+                    if (message.text && message.text.match(/^d*$/)) {
+                        web.chat.delete({
+                            channel: channel,
+                            ts: message.ts,
+                            as_user: true
+                        })
+                    } else {
+                        try {
+                            await web.chat.delete({
+                                channel: channel,
+                                ts: message.ts,
+                                as_user: true
+                            })
+                            deleted++
+                            if (deleted >= count) {
+                                break
+                            }
+                        } catch {
+                            // Race condition, fail safely 
+                            // since it will not make a difference
+                            // (deleted is not incremented)
+                        }
+                    }
+                }
+            }
+        }
+
+        async function collectReplies(channel, thread_ts) {
+            let replies = []
+            async function getNext(cursor) {
+                const history = await web.conversations.replies({
+                    channel: channel,
+                    ts: thread_ts,
+                    cursor: cursor
+                })
+                replies.push(...history.messages)
+                if(history.has_more) {
+                    await getNext(history.response_metadata.next_cursor)  
+                }
+            }
+            await getNext(undefined)
+            return replies
+        } 
 
         rtm.start()
     }
 
     const users = await prisma.user.findMany()
 
-    for (const {slackID, token} of users) {
+    for (const { slackID, token } of users) {
         listen(slackID, token)
     }
 
@@ -72,7 +99,7 @@ async function main() {
             await prisma.user.upsert({
                 where: { slackID: response.user_id },
                 update: { token: response.access_token },
-                create: { 
+                create: {
                     slackID: response.user_id,
                     token: response.access_token
                 }
