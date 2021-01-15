@@ -7,13 +7,14 @@ const prisma = new PrismaClient()
 const botClient = new WebClient(process.env.SLACK_BOT_TOKEN)
 
 async function main() {
+    const regexForD = /^[dD]*$/
     function listen(id, token) {
         const rtm = new RTMClient(token)
         const web = new WebClient(token)
 
         rtm.on('message', (event) => {
             if (event.user === id && event.text) {
-                const matched = event.text.match(/^[dD]*$/)
+                const matched = event.text.match(regexForD)
 
                 if (matched) {
                     if (!event.thread_ts) {
@@ -35,7 +36,7 @@ async function main() {
             let deleted = 0
             for (const message of messages) {
                 if (message.user === id) {
-                    if (message.text && message.text.match(/^d*$/)) {
+                    if (message.text && message.text.match(regexForD)) {
                         web.chat.delete({
                             channel: channel,
                             ts: message.ts,
