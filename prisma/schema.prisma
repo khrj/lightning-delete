@@ -8,6 +8,6 @@ datasource db {
 }
 
 model User {
-    slackID      String @unique
-    installation String
+    slackID String @unique
+    token   String
 }
