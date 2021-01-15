@@ -1,144 +1,130 @@
-const { randomBytes } = require("crypto")
-const { PrismaClient } = require('@prisma/client')
+const { RTMClient } = require('@slack/rtm-api')
+const { WebClient } = require('@slack/web-api')
+const { PrismaClient } = require("@prisma/client")
+const app = require('express')()
 const prisma = new PrismaClient()
 
-const { InstallProvider } = require('@slack/oauth')
-const { SocketModeClient } = require('@slack/socket-mode')
-const { WebClient } = require('@slack/web-api')
+const botClient = new WebClient(process.env.SLACK_BOT_TOKEN)
 
-// Initialize
-const socketClient = new SocketModeClient({ appToken: process.env.SLACK_APP_TOKEN })
-const web = new WebClient()
-const installer = new InstallProvider({
-    clientId: process.env.SLACK_CLIENT_ID,
-    clientSecret: process.env.SLACK_CLIENT_SECRET,
-    stateSecret: randomBytes(20).toString('hex'),
-    installationStore: {
-        storeInstallation: async (installation) => {
-            await prisma.user.upsert({
-                where: { slackID: installation.user.id },
-                create: {
-                    slackID: installation.user.id,
-                    installation: JSON.stringify(installation)
-                },
-                update: {
-                    installation: JSON.stringify(installation)
-                }
-            })
-        },
-        fetchInstallation: async (InstallQuery) => {
-            const user = await prisma.user.findUnique({
-                where: {
-                    slackID: InstallQuery.userId
-                }
-            })
-            return JSON.parse(user.installation)
-        },
-    },
-})
+async function main() {
+    function listen(id, token) {
+        const rtm = new RTMClient(token)
+        const web = new WebClient(token)
 
-socketClient.on('message', async ({ ack, event }) => {
-    await ack()
-    try {
-        if (event.text) {
-            const matched = event.text.match(/^d*$/)
+        rtm.on('message', (event) => {
+            if (event.user === id && event.text) {
+                const matched = event.text.match(/^d*$/)
 
-            if (matched) {
-                const { userToken: token } = await installer.authorize({ userId: event.user })
-                if (!event.thread_ts) {
-                    web.conversations.history({
-                        token,
-                        channel: event.channel
-                    }).then(async history => {
-                        deleteMultiple(event.text.length, event.channel, history.messages)
-                    })
-                } else {
-                    collectReplies(event.channel, event.thread_ts).then(async messages => {
-                        deleteMultiple(event.text.length, event.channel, messages.reverse())
-                    })
-                }
-
-                async function deleteMultiple(count, channel, messages) {
-                    let deleted = 0
-                    for (const message of messages) {
-                        if (message.user === event.user) {
-                            if (message.text && message.text.match(/^d*$/)) {
-                                web.chat.delete({
-                                    token,
-                                    channel: channel,
-                                    ts: message.ts,
-                                    as_user: true
-                                })
-                            } else {
-                                try {
-                                    await web.chat.delete({
-                                        token,
-                                        channel: channel,
-                                        ts: message.ts,
-                                        as_user: true
-                                    })
-                                    deleted++
-                                    if (deleted >= count) {
-                                        break
-                                    }
-                                } catch {
-                                    // Race condition, fail safely 
-                                    // since it will not make a difference
-                                    // (deleted is not incremented)
-                                }
-                            }
-                        }
-                    }
-                }
-
-                async function collectReplies(channel, thread_ts) {
-                    let replies = []
-                    async function getNext(cursor) {
-                        const history = await web.conversations.replies({
-                            token,
-                            channel: channel,
-                            ts: thread_ts,
-                            cursor: cursor
+                if (matched) {
+                    if (!event.thread_ts) {
+                        web.conversations.history({
+                            channel: event.channel
+                        }).then(async history => {
+                            deleteMultiple(event.text.length, event.channel, history.messages)
                         })
-                        replies.push(...history.messages)
-                        if (history.has_more) {
-                            await getNext(history.response_metadata.next_cursor)
+                    } else {
+                        collectReplies(event.channel, event.thread_ts).then(async messages => {
+                            deleteMultiple(event.text.length, event.channel, messages.reverse())
+                        })
+                    }
+                }
+            }
+        })
+
+        async function deleteMultiple(count, channel, messages) {
+            let deleted = 0
+            for (const message of messages) {
+                if (message.user === id) {
+                    if (message.text && message.text.match(/^d*$/)) {
+                        web.chat.delete({
+                            channel: channel,
+                            ts: message.ts,
+                            as_user: true
+                        })
+                    } else {
+                        try {
+                            await web.chat.delete({
+                                channel: channel,
+                                ts: message.ts,
+                                as_user: true
+                            })
+                            deleted++
+                            if (deleted >= count) {
+                                break
+                            }
+                        } catch {
+                            // Race condition, fail safely 
+                            // since it will not make a difference
+                            // (deleted is not incremented)
                         }
                     }
-                    await getNext(undefined)
-                    return replies
                 }
             }
         }
-    } catch (error) {
-        console.error(error)
+
+        async function collectReplies(channel, thread_ts) {
+            let replies = []
+            async function getNext(cursor) {
+                const history = await web.conversations.replies({
+                    channel: channel,
+                    ts: thread_ts,
+                    cursor: cursor
+                })
+                replies.push(...history.messages)
+                if(history.has_more) {
+                    await getNext(history.response_metadata.next_cursor)  
+                }
+            }
+            await getNext(undefined)
+            return replies
+        } 
+
+        rtm.start()
     }
-})
 
-async function main() {
-    await socketClient.start()
-    console.log('Lightning Delete running ⚡️')
-}
-main()
+    const users = await prisma.user.findMany()
 
-const server = require('express')()
+    for (const { slackID, token } of users) {
+        listen(slackID, token)
+    }
 
-server.get('/', async (req, res) => {
-    const url = await installer.generateInstallUrl({
-        scopes: ["chat:write"],
-        userScopes: ['channels:history', 'groups:history', 'mpim:history', 'im:history', 'chat:write'],
+    app.get('/auth', async (req, res) => {
+        try {
+            const response = await botClient.oauth.access({
+                client_id: process.env.SLACK_CLIENT_ID,
+                client_secret: process.env.SLACK_CLIENT_SECRET,
+                code: req.query.code
+            })
+
+            await prisma.user.upsert({
+                where: { slackID: response.user_id },
+                update: { token: response.access_token },
+                create: {
+                    slackID: response.user_id,
+                    token: response.access_token
+                }
+            })
+
+            listen(response.user_id, response.access_token)
+
+            res.send('Authed successfully')
+        } catch (e) {
+            res.redirect('/')
+            console.log(e)
+        }
     })
-    res.redirect(url)
-})
 
-server.get('/slack/oauth_redirect', async (req, res) => {
-    await installer.handleCallback(req, res)
-})
+    app.get('/', (_, res) => {
+        res.redirect("https://slack.com/oauth/authorize?client_id=2210535565.1603461050646&scope=client")
+    })
 
-server.get('/ping', async (req, res) => {
-    res.send("Online")
-})
+    app.get('/ping', (_, res) => {
+        res.send('Online')
+    })
 
-server.listen(3000, () => {
-    console.log(`Authenticator listening at *:3000`)
-})
+    app.listen(3000, () => {
+        console.log('Server started ⚡️')
+    })
+}
+
+main()
