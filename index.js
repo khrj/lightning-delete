@@ -13,7 +13,7 @@ async function main() {
 
         rtm.on('message', (event) => {
             if (event.user === id && event.text) {
-                const matched = event.text.match(/^d*$/)
+                const matched = event.text.match(/^[dD]*$/)
 
                 if (matched) {
                     if (!event.thread_ts) {
