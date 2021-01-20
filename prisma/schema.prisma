@@ -8,6 +8,7 @@ datasource db {
 }
 
 model User {
-    slackID String @unique
-    token   String
+    queuePostition Int    @default(autoincrement())
+    slackID        String @unique
+    token          String
 }
