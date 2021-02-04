@@ -161,8 +161,4 @@ receiver.app.get('/', (_, res) => {
     res.redirect("https://slack.com/oauth/authorize?client_id=2210535565.1603461050646&scope=client")
 })
 
-receiver.app.get('/ping', (_, res) => {
-    res.send('Online')
-})
-
 main()
