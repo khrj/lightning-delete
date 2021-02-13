@@ -165,3 +165,10 @@ receiver.app.get('/', (_, res) => {
 })
 
 main()
+  .catch(e => {
+      throw e
+  })
+  .finally(async () => {
+      await prisma.$disconnect()
+  })
+
