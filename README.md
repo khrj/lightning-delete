@@ -33,6 +33,12 @@ Send 'd' (case-insensitive, no other text) to delete your last message. Send mul
 
 ![Demo of deleting multiple (3) messages (Hello, Hi, Hey) by typing 'ddd'](assets/multiple.gif)
 
+## Supporters
+
+[![Stargazers repo roster for @KhushrajRathod/LightningDelete](https://reporoster.com/stars/KhushrajRathod/LightningDelete)](https://github.com/KhushrajRathod/LightningDelete/stargazers)
+
+[![Forkers repo roster for @KhushrajRathod/LightningDelete](https://reporoster.com/forks/KhushrajRathod/LightningDelete)](https://github.com/KhushrajRathod/LightningDelete/network/members)
+
 ## Related
 
 - [Slack Info Bot](https://github.com/KhushrajRathod/SlackInfoBot)
