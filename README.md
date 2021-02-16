@@ -32,3 +32,8 @@ Send 'd' (case-insensitive, no other text) to delete your last message. Send mul
 ### Multiple
 
 ![Demo of deleting multiple (3) messages (Hello, Hi, Hey) by typing 'ddd'](assets/multiple.gif)
+
+## Related
+
+- [Slack Info Bot](https://github.com/KhushrajRathod/SlackInfoBot)
+- [Bolt Cross Workspace Starter](https://github.com/KhushrajRathod/BoltCrossWorkspaceStarter)
