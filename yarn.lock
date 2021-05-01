@@ -19,10 +19,10 @@
   resolved "https://registry.yarnpkg.com/@prisma/engines/-/engines-2.16.0-44.854c8ba7f0dce66f115af36af24e66989a8c02a1.tgz#c7a53f31eafca0e4c010663740ee22ea678f757e"
   integrity sha512-vt8w+vqCEaTUGZes7mrY5BkF3zZIPTQ9x+C9Ynmr9d+WW54vTqJt7lDFS6eps0LYoqdcCHEs3r/SydCqjII+OQ==
 
-"@slack/bolt@^3.0.0":
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/@slack/bolt/-/bolt-3.1.1.tgz#a78b59a85803044483166d7b9b3c1aae02f7724d"
-  integrity sha512-bX+EMrcGGLc3PsLJk9UUrd1MTuS09S42EyUZq9V/ZtQy5EqUcr4zr2LWUajAtQhKAi96ofQNt72vJkCK1GOTPQ==
+"@slack/bolt@^3.3.0":
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/@slack/bolt/-/bolt-3.3.0.tgz#9bfb9252091f845ab20cac20d6801edae794a169"
+  integrity sha512-rG9OHszzbJB8ZQHUl8v/IR22OodOhx+jGUGm0ZEb0kKmISUNuOGY7FLbPav4soafQg+fKfj4sWtDNfXesZrDag==
   dependencies:
     "@slack/logger" "^3.0.0"
     "@slack/oauth" "^2.0.0"
