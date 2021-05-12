@@ -124,18 +124,19 @@
     p-queue "^6.6.1"
     p-retry "^4.0.0"
 
-"@slack/web-api@^6.0.0", "@slack/web-api@^6.1.0":
-  version "6.1.0"
-  resolved "https://registry.yarnpkg.com/@slack/web-api/-/web-api-6.1.0.tgz#27a17f61eb72100d6722ff17f581349c41d19b5f"
-  integrity sha512-9MVHw+rDBaFvkvzm8lDNH/nlkvJCDKRIjFGMdpbyZlVLsm4rcht4qyiL71bqdyLATHXJnWknb/sl0FQGLLobIA==
+"@slack/web-api@^6.0.0", "@slack/web-api@^6.2.3":
+  version "6.2.3"
+  resolved "https://registry.yarnpkg.com/@slack/web-api/-/web-api-6.2.3.tgz#063ca32987587d1879520badab485796be621e77"
+  integrity sha512-Qt0JUSuT1RKFYRpMfbP0xKkqWoXGzmEa4N+7H5oB9eH228ABn1sM3LDNW7ZQiLs5jpDuzHAp7dSxAZpb+ZfO/w==
   dependencies:
-    "@slack/logger" ">=1.0.0 <3.0.0"
-    "@slack/types" "^1.7.0"
+    "@slack/logger" "^3.0.0"
+    "@slack/types" "^2.0.0"
     "@types/is-stream" "^1.1.0"
     "@types/node" ">=12.0.0"
     axios "^0.21.1"
     eventemitter3 "^3.1.0"
     form-data "^2.5.0"
+    is-electron "^2.2.0"
     is-stream "^1.1.0"
     p-queue "^6.6.1"
     p-retry "^4.0.0"
@@ -645,6 +646,11 @@ is-date-object@^1.0.1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/is-date-object/-/is-date-object-1.0.2.tgz#bda736f2cd8fd06d32844e7743bfa7494c3bfd7e"
   integrity sha512-USlDT524woQ08aoZFzh3/Z6ch9Y/EWXEHQ/AaRN0SkKq4t2Jw2R2339tSXmwuVoY7LLlBCbOIlx2myP/L5zk0g==
+
+is-electron@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/is-electron/-/is-electron-2.2.0.tgz#8943084f09e8b731b3a7a0298a7b5d56f6b7eef0"
+  integrity sha512-SpMppC2XR3YdxSzczXReBjqs2zGscWQpBIKqwXYBFic0ERaxNVgwLCHwOLZeESfdJQjX0RDvrJ1lBXX2ij+G1Q==
 
 is-map@^2.0.2:
   version "2.0.2"
