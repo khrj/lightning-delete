@@ -1,13 +1,10 @@
-import dotenv from 'dotenv'
-dotenv.config()
-
-import { RTMClient } from '@slack/rtm-api'
-import { WebClient } from '@slack/web-api'
-import { App, ExpressReceiver } from '@slack/bolt'
 import { PrismaClient } from "@prisma/client"
+import { App, ExpressReceiver } from "@slack/bolt"
+import { RTMClient } from "@slack/rtm-api"
+import { WebClient } from "@slack/web-api"
 
 const prisma = new PrismaClient()
-const receiver = new ExpressReceiver({ signingSecret: process.env.SLACK_SIGNING_SECRET!, endpoints: '/slack/events' })
+const receiver = new ExpressReceiver({ signingSecret: process.env.SLACK_SIGNING_SECRET!, endpoints: "/slack/events" })
 const app = new App({
     receiver,
     token: process.env.SLACK_BOT_TOKEN,
@@ -17,7 +14,7 @@ const onlineSymbol = ":large_green_circle:"
 const startingSymbol = ":large_orange_circle:"
 
 interface OnlineUsersMap {
-    [id: string]: boolean 
+    [id: string]: boolean
 }
 
 let onlineUsersMap: OnlineUsersMap = {}
@@ -27,14 +24,14 @@ function listen(id: string, token: string) {
     const rtm = new RTMClient(token)
     const web = new WebClient(token)
 
-    rtm.on('message', (event) => {
+    rtm.on("message", (event) => {
         if (event.user === id && event.text) {
             const matched = event.text.match(regexForD)
 
             if (matched) {
                 if (!event.thread_ts) {
                     web.conversations.history({
-                        channel: event.channel
+                        channel: event.channel,
                     }).then(async history => {
                         deleteMultiple(event.text.length, event.channel, history.messages as any[])
                     })
@@ -55,21 +52,21 @@ function listen(id: string, token: string) {
                     web.chat.delete({
                         channel: channel,
                         ts: message.ts,
-                        as_user: true
+                        as_user: true,
                     })
                 } else {
                     try {
                         await web.chat.delete({
                             channel: channel,
                             ts: message.ts,
-                            as_user: true
+                            as_user: true,
                         })
                         deleted++
                         if (deleted >= count) {
                             break
                         }
                     } catch {
-                        // Race condition, fail safely 
+                        // Race condition, fail safely
                         // since it will not make a difference
                         // (deleted is not incremented)
                     }
@@ -84,7 +81,7 @@ function listen(id: string, token: string) {
             const history = await web.conversations.replies({
                 channel: channel,
                 ts: thread_ts,
-                cursor: cursor
+                cursor: cursor,
             })
             replies.push(...(history.messages as any[]))
             if (history.has_more) {
@@ -98,14 +95,23 @@ function listen(id: string, token: string) {
     rtm.start()
 }
 
-
 async function main() {
-    await app.start(process.env.PORT ? parseInt(process.env.PORT) : 3000)
-    console.log('⚡️ Bolt app is running!')
+    if (
+        !process.env.PORT
+        || !process.env.SLACK_SIGNING_SECRET
+        || !process.env.SLACK_CLIENT_SECRET
+        || !process.env.SLACK_CLIENT_ID
+        || !process.env.SLACK_BOT_TOKEN
+    ) {
+        throw "Missing env variable: Check that the following are available: PORT, SLACK_SIGNING_SECRET, SLACK_CLIENT_ID, SLACK_CLIENT_SECRET and SLACK_BOT_TOKEN"
+    }
+
+    await app.start(parseInt(process.env.PORT))
+    console.log("⚡️ Bolt app is running!")
 
     const users = await prisma.user.findMany({
         orderBy: {
-            queuePostition: 'asc',
+            queuePostition: "asc",
         },
     })
 
@@ -120,7 +126,7 @@ async function main() {
     }
 }
 
-app.command('/lightning-status', async ({ command, ack, client }) => {
+app.command("/lightning-status", async ({ command, ack, client }) => {
     await ack()
     let build = ":zap: Lightning Delete Status (one user goes online each minute due to rate limits):\n\n"
 
@@ -131,16 +137,16 @@ app.command('/lightning-status', async ({ command, ack, client }) => {
     await client.chat.postEphemeral({
         channel: command.channel_id,
         user: command.user_id,
-        text: build
+        text: build,
     })
 })
 
-receiver.app.get('/auth', async (req, res) => {
+receiver.app.get("/auth", async (req, res) => {
     try {
         const response = await app.client.oauth.access({
             client_id: process.env.SLACK_CLIENT_ID!,
             client_secret: process.env.SLACK_CLIENT_SECRET!,
-            code: req.query.code as string
+            code: req.query.code as string,
         })
 
         await prisma.user.upsert({
@@ -148,28 +154,27 @@ receiver.app.get('/auth', async (req, res) => {
             update: { token: response.access_token as string },
             create: {
                 slackID: response.user_id as string,
-                token: response.access_token as string
-            }
+                token: response.access_token as string,
+            },
         })
 
         listen(response.user_id as string, response.access_token as string)
 
-        res.send('Authed successfully')
+        res.send("Authed successfully")
     } catch (e) {
-        res.redirect('/')
+        res.redirect("/")
         console.log(e)
     }
 })
 
-receiver.app.get('/', (_, res) => {
+receiver.app.get("/", (_, res) => {
     res.redirect("https://slack.com/oauth/authorize?client_id=2210535565.1603461050646&scope=client")
 })
 
 main()
-  .catch(e => {
-      throw e
-  })
-  .finally(async () => {
-      await prisma.$disconnect()
-  })
-
+    .catch(e => {
+        throw e
+    })
+    .finally(async () => {
+        await prisma.$disconnect()
+    })
