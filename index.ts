@@ -1,12 +1,13 @@
+import dotenv from 'dotenv'
+dotenv.config()
+
 import { RTMClient } from '@slack/rtm-api'
 import { WebClient } from '@slack/web-api'
 import { App, ExpressReceiver } from '@slack/bolt'
-
 import { PrismaClient } from "@prisma/client"
+
 const prisma = new PrismaClient()
-
 const receiver = new ExpressReceiver({ signingSecret: process.env.SLACK_SIGNING_SECRET!, endpoints: '/slack/events' })
-
 const app = new App({
     receiver,
     token: process.env.SLACK_BOT_TOKEN,
