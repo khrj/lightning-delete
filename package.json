@@ -1,5 +1,6 @@
 {
     "devDependencies": {
+        "@railway/cli": "0.2.37",
         "prisma": "2.25.0"
     },
     "dependencies": {
