@@ -5,10 +5,10 @@
         <b>Delete your recent slack messages. <i>Instantly ⚡️</i></b>
     </p>
     <p>
-        <img alt="language" src="https://img.shields.io/github/languages/top/KhushrajRathod/LightningDelete" >
-        <img alt="code size" src="https://img.shields.io/github/languages/code-size/KhushrajRathod/LightningDelete">
-        <img alt="issues" src="https://img.shields.io/github/issues/KhushrajRathod/LightningDelete" >
-        <img alt="license" src="https://img.shields.io/github/license/KhushrajRathod/LightningDelete?color=green">
+        <img alt="language" src="https://img.shields.io/github/languages/top/khrj/lightning-delete" >
+        <img alt="code size" src="https://img.shields.io/github/languages/code-size/khrj/lightning-delete">
+        <img alt="issues" src="https://img.shields.io/github/issues/khrj/lightning-delete" >
+        <img alt="license" src="https://img.shields.io/github/license/khrj/lightning-delete?color=green">
     </p>
     <p>
         <!-- Add to slack -->
@@ -35,11 +35,11 @@ Send 'd' (case-insensitive, no other text) to delete your last message. Send mul
 
 ## Supporters
 
-[![Stargazers repo roster for @KhushrajRathod/LightningDelete](https://reporoster.com/stars/KhushrajRathod/LightningDelete)](https://github.com/KhushrajRathod/LightningDelete/stargazers)
+[![Stargazers repo roster for @khrj/lightning-delete](https://reporoster.com/stars/khrj/lightning-delete)](https://github.com/khrj/lightning-delete/stargazers)
 
-[![Forkers repo roster for @KhushrajRathod/LightningDelete](https://reporoster.com/forks/KhushrajRathod/LightningDelete)](https://github.com/KhushrajRathod/LightningDelete/network/members)
+[![Forkers repo roster for @khrj/lightning-delete](https://reporoster.com/forks/khrj/lightning-delete)](https://github.com/khrj/lightning-delete/network/members)
 
 ## Related
 
-- [Slack Info Bot](https://github.com/KhushrajRathod/SlackInfoBot)
-- [Bolt Cross Workspace Starter](https://github.com/KhushrajRathod/BoltCrossWorkspaceStarter)
+- [Slack Info Bot](https://github.com/krhj/slack-info-bot)
+- [Bolt Cross Workspace Starter](https://github.com/khrj/bolt-cross-workspace-starter)
